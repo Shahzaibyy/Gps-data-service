@@ -139,7 +139,7 @@ docker run -d \
 Your MongoDB Atlas cluster is already configured in the `.env` file:
 
 ```
-MONGODB_URL="mongodb+srv://shahzaibshah0028_db_user:KcJoGMEtFEnnui0r@gpsdevice.ytysti8.mongodb.net/?appName=gpsdevice"
+MONGODB_URL=""
 MONGODB_DB_NAME="gps_telemetry"
 ```
 
