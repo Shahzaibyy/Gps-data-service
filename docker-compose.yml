@@ -1,0 +1,83 @@
+services:
+  # GPS Data Collection Service
+  gps-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: gps-data-collection-service
+    ports:
+      - "8000:8000"
+    dns:
+      - 8.8.8.8
+      - 1.0.0.1
+    environment:
+      # Application
+      - ENVIRONMENT=development
+      - DEBUG=true
+      - LOG_LEVEL=INFO
+      - ALLOW_MONGODB_FAILURE=false
+      
+      # MongoDB Atlas Connection (Your Cluster)
+      - MONGODB_URL=mongodb+srv://shahzaibshah0028_db_user:KcJoGMEtFEnnui0r@gpsdevice.ytysti8.mongodb.net/?appName=gpsdevice
+      - MONGODB_DB_NAME=gps_telemetry
+      - MONGODB_MIN_POOL_SIZE=10
+      - MONGODB_MAX_POOL_SIZE=100
+      
+      # GPS Provider
+      - GPS_PROVIDER_TYPE=mock
+      - GPS_API_BASE_URL=http://base_url:3000 
+      - GPS_API_ENDPOINT=/prod/prod
+      - GPS_API_USERNAME=user_name
+      - GPS_API_PASSWORD=password
+      - GPS_API_TIMEOUT=30
+      - GPS_API_MAX_RETRIES=3
+      
+      # Concurrency
+      - MAX_CONCURRENT_REQUESTS=10
+      - BATCH_SIZE=50
+      - RATE_LIMIT_REQUESTS_PER_SECOND=5.0
+      
+      # Job Schedules (More frequent for testing)
+      - JOB_VEHICLE_POSITION_CRON=*/2 * * * *
+      - JOB_ODOMETER_CRON=*/3 * * * *
+      - JOB_ENGINE_STATUS_CRON=*/4 * * * *
+      - JOB_SPEED_MONITORING_CRON=*/2 * * * *
+      - JOB_IGNITION_CRON=*/5 * * * *
+      - JOB_VOLTAGE_HEALTH_CRON=*/6 * * * *
+      
+      # Data Retention
+      - TELEMETRY_RETENTION_DAYS=90
+      - JOB_LOG_RETENTION_DAYS=30
+    
+    restart: unless-stopped
+    
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
+        reservations:
+          cpus: '1'
+          memory: 1G
+
+  # Optional: Redis for caching (future use)
+  # redis:
+  #   image: redis:7-alpine
+  #   container_name: gps-redis
+  #   ports:
+  #     - "6379:6379"
+  #   networks:
+  #     - gps-network
+  #   volumes:
+  #     - redis-data:/data
+
+# volumes:
+#   redis-data:
